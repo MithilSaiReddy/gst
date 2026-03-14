@@ -1,0 +1,37 @@
+[
+  {
+    "name": "daily-invoice-scan",
+    "prompt": "Scan workspace/invoices/ for any new unprocessed PDF files. Extract GST data from each file, log results to workspace/logs/activity.log, and move processed files to workspace/invoices/processed/. Report how many files were processed and any flags found.",
+    "interval_minutes": 1440,
+    "last_run": null,
+    "enabled": true
+  },
+  {
+    "name": "gstr1-compilation",
+    "prompt": "Today is the 11th. Compile GSTR-1 for the previous month using compile_gstr1. Write B2B, B2C, and HSN summary CSVs to workspace/outputs/. Log completion to workspace/logs/activity.log.",
+    "interval_minutes": 43200,
+    "last_run": null,
+    "enabled": true
+  },
+  {
+    "name": "gstr3b-summary",
+    "prompt": "Today is the 18th. Generate GSTR-3B summary for the previous month using generate_gstr3b. Compute tax liability, ITC available, and net payable. Write JSON report to workspace/outputs/. Log to activity.log.",
+    "interval_minutes": 43200,
+    "last_run": null,
+    "enabled": true
+  },
+  {
+    "name": "monthly-pl-report",
+    "prompt": "Generate monthly P&L report for the previous month using generate_pl_report. Write CSV and JSON to workspace/outputs/. Log to activity.log.",
+    "interval_minutes": 43200,
+    "last_run": null,
+    "enabled": true
+  },
+  {
+    "name": "mismatch-audit",
+    "prompt": "Run generate_mismatch_report for this month. Check for tax rate mismatches, missing GSTINs, blocked ITC, and suspected duplicates. Write report to workspace/outputs/. If any critical flags found, prepend URGENT to the log entry.",
+    "interval_minutes": 10080,
+    "last_run": null,
+    "enabled": true
+  }
+]

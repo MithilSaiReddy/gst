@@ -1,0 +1,41 @@
+{
+  "status": "complete",
+  "extraction_engine": "unsiloed_vision",
+  "files_processed": 0,
+  "errors": 7,
+  "total_taxable_value": 0,
+  "total_tax_collected": 0,
+  "total_flags": 0,
+  "flag_summary": [],
+  "invoices": [],
+  "error_details": [
+    {
+      "file": "invoice_VS-2026-1010.pdf",
+      "error": "404 Client Error: Not Found for url: https://prod.visionapi.unsiloed.ai/jobs/result/4253a82a-7a82-4d7e-994e-769f99f5e51f"
+    },
+    {
+      "file": "VS-2026-001-walkIn-b2c.pdf",
+      "error": "404 Client Error: Not Found for url: https://prod.visionapi.unsiloed.ai/jobs/result/0a3ce4f9-96bc-4d42-9050-4e3cec8fe553"
+    },
+    {
+      "file": "VS-2026-002-b2b-reseller-mysuru.pdf",
+      "error": "404 Client Error: Not Found for url: https://prod.visionapi.unsiloed.ai/jobs/result/569e3133-ffec-4047-b174-7bde6d38e7ad"
+    },
+    {
+      "file": "VS-2026-003-b2c-large-wedding.pdf",
+      "error": "404 Client Error: Not Found for url: https://prod.visionapi.unsiloed.ai/jobs/result/7be7e2c0-1eb8-466f-a9d2-c011d5acf618"
+    },
+    {
+      "file": "VS-2026-004-purchase-fabric-surat.pdf",
+      "error": "404 Client Error: Not Found for url: https://prod.visionapi.unsiloed.ai/jobs/result/cde6308a-b7dd-4a11-bbd3-c314c0c95b4c"
+    },
+    {
+      "file": "VS-2026-005-FLAG-invalid-gstin.pdf",
+      "error": "404 Client Error: Not Found for url: https://prod.visionapi.unsiloed.ai/jobs/result/02171442-1256-471a-bc48-bb7015e9bf47"
+    },
+    {
+      "file": "VS-2026-006-FLAG-itc-blocked-food.pdf",
+      "error": "404 Client Error: Not Found for url: https://prod.visionapi.unsiloed.ai/jobs/result/fe5883ca-a8e5-48d8-906e-3e25f3f4b0c7"
+    }
+  ]
+}

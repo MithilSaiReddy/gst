@@ -1,0 +1,2085 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Accounting Agent Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --black: #000000;
+    --white: #ffffff;
+    --gray-50: #fafafa;
+    --gray-100: #f4f4f4;
+    --gray-200: #e8e8e8;
+    --gray-300: #d0d0d0;
+    --gray-400: #a0a0a0;
+    --gray-500: #707070;
+    --gray-600: #505050;
+    --gray-700: #303030;
+    --gray-800: #1a1a1a;
+    --gray-900: #0d0d0d;
+    --font: 'Roboto', sans-serif;
+    --mono: 'Roboto Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font);
+    background: var(--white);
+    color: var(--black);
+    min-height: 100vh;
+    font-size: 13px;
+  }
+
+  /* LAYOUT */
+  .layout { display: flex; height: 100vh; overflow: hidden; }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 220px;
+    min-width: 220px;
+    background: var(--black);
+    color: var(--white);
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--gray-800);
+  }
+
+  .sidebar-logo {
+    padding: 28px 24px 24px;
+    border-bottom: 1px solid var(--gray-800);
+  }
+
+  .logo-name {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--white);
+  }
+
+  .logo-sub {
+    font-size: 10px;
+    color: var(--gray-500);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-top: 4px;
+    font-weight: 400;
+  }
+
+  .sidebar-nav { padding: 16px 0; flex: 1; }
+
+  .nav-section-label {
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gray-600);
+    padding: 12px 24px 6px;
+    font-weight: 500;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 24px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--gray-400);
+    transition: all 0.15s;
+    border-left: 2px solid transparent;
+    user-select: none;
+  }
+
+  .nav-item:hover { color: var(--white); background: var(--gray-900); }
+  .nav-item.active { color: var(--white); border-left-color: var(--white); background: var(--gray-900); font-weight: 500; }
+
+  .nav-icon {
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .sidebar-status {
+    padding: 16px 24px;
+    border-top: 1px solid var(--gray-800);
+  }
+
+  .status-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--white);
+    flex-shrink: 0;
+  }
+
+  .status-dot.idle { background: var(--gray-600); }
+  .status-dot.working { background: var(--white); animation: blink 1.2s infinite; }
+
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+  .status-label { font-size: 11px; color: var(--gray-400); }
+  .status-value { font-size: 11px; color: var(--white); font-weight: 500; margin-left: auto; }
+
+  /* MAIN */
+  .main { flex: 1; overflow-y: auto; background: var(--white); }
+
+  /* TOPBAR */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+    height: 56px;
+    border-bottom: 1px solid var(--gray-200);
+    position: sticky;
+    top: 0;
+    background: var(--white);
+    z-index: 10;
+  }
+
+  .topbar-title { font-size: 15px; font-weight: 500; letter-spacing: -0.01em; }
+  .topbar-meta { font-size: 11px; color: var(--gray-400); margin-top: 1px; }
+
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+
+  .btn {
+    font-family: var(--font);
+    font-size: 12px;
+    font-weight: 500;
+    padding: 7px 16px;
+    border-radius: 2px;
+    cursor: pointer;
+    letter-spacing: 0.02em;
+    transition: all 0.15s;
+    border: 1px solid transparent;
+  }
+
+  .btn-primary { background: var(--black); color: var(--white); border-color: var(--black); }
+  .btn-primary:hover { background: var(--gray-800); }
+  .btn-secondary { background: var(--white); color: var(--black); border-color: var(--gray-300); }
+  .btn-secondary:hover { border-color: var(--black); }
+  .btn-ghost { background: none; color: var(--gray-600); border-color: transparent; }
+  .btn-ghost:hover { color: var(--black); }
+
+  /* CONTENT */
+  .content { padding: 28px 32px; }
+
+  /* CARDS */
+  .card {
+    border: 1px solid var(--gray-200);
+    border-radius: 2px;
+    background: var(--white);
+  }
+
+  .card-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--gray-100);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .card-title {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gray-600);
+  }
+
+  .card-body { padding: 20px; }
+
+  /* STATS GRID */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--gray-200);
+    border: 1px solid var(--gray-200);
+    margin-bottom: 20px;
+  }
+
+  .stat-cell {
+    background: var(--white);
+    padding: 20px 24px;
+  }
+
+  .stat-label {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gray-400);
+    font-weight: 500;
+    margin-bottom: 10px;
+  }
+
+  .stat-value {
+    font-size: 26px;
+    font-weight: 300;
+    letter-spacing: -0.03em;
+    color: var(--black);
+    font-family: var(--mono);
+  }
+
+  .stat-sub {
+    font-size: 10px;
+    color: var(--gray-400);
+    margin-top: 6px;
+  }
+
+  .stat-delta {
+    font-size: 10px;
+    margin-top: 6px;
+    font-family: var(--mono);
+  }
+  .stat-delta.up { color: var(--black); }
+  .stat-delta.down { color: var(--gray-500); }
+
+  /* ACTIVITY LOG */
+  .log-terminal {
+    background: var(--black);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .log-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--gray-800);
+  }
+
+  .log-bar-left { display: flex; align-items: center; gap: 8px; }
+
+  .log-dots { display: flex; gap: 5px; }
+  .log-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--gray-700); }
+
+  .log-bar-title { font-size: 10px; color: var(--gray-500); font-family: var(--mono); letter-spacing: 0.06em; }
+
+  .log-stream {
+    height: 280px;
+    overflow-y: auto;
+    padding: 14px 16px;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    line-height: 1.8;
+  }
+
+  .log-stream::-webkit-scrollbar { width: 3px; }
+  .log-stream::-webkit-scrollbar-thumb { background: var(--gray-700); }
+
+  .log-line { animation: fadeIn 0.25s ease; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .log-time { color: var(--gray-600); margin-right: 10px; }
+  .log-info { color: var(--gray-400); }
+  .log-work { color: var(--gray-300); }
+  .log-success { color: var(--white); }
+  .log-warn { color: var(--gray-400); text-decoration: underline; text-underline-offset: 3px; }
+  .log-cursor { color: var(--white); animation: blink 1s infinite; font-weight: 700; }
+
+  /* ACTIVITY FEED */
+  .activity-feed { }
+
+  .activity-item {
+    display: flex;
+    gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--gray-100);
+    align-items: flex-start;
+  }
+
+  .activity-item:last-child { border-bottom: none; }
+
+  .activity-time {
+    font-size: 10px;
+    color: var(--gray-400);
+    font-family: var(--mono);
+    min-width: 80px;
+    padding-top: 2px;
+    flex-shrink: 0;
+  }
+
+  .activity-content { flex: 1; }
+  .activity-title { font-size: 13px; font-weight: 400; color: var(--black); }
+  .activity-meta { font-size: 11px; color: var(--gray-500); margin-top: 3px; }
+
+  .badge {
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 1px;
+    flex-shrink: 0;
+  }
+
+  .badge-done { background: var(--black); color: var(--white); }
+  .badge-warn { background: var(--gray-100); color: var(--gray-700); border: 1px solid var(--gray-300); }
+  .badge-info { background: var(--gray-100); color: var(--gray-600); }
+
+  /* KANBAN */
+  .kanban-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .kanban-col {
+    border: 1px solid var(--gray-200);
+    border-radius: 2px;
+    min-height: 400px;
+  }
+
+  .kanban-col-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--gray-100);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .kanban-col-title {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gray-600);
+  }
+
+  .kanban-count {
+    font-size: 10px;
+    color: var(--gray-400);
+    background: var(--gray-100);
+    padding: 1px 7px;
+    border-radius: 10px;
+    font-family: var(--mono);
+  }
+
+  .kanban-body {
+    padding: 12px;
+    min-height: 340px;
+    transition: background 0.15s;
+  }
+
+  .kanban-body.dragover { background: var(--gray-50); }
+
+  .task-card {
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: 2px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    cursor: grab;
+    transition: all 0.15s;
+    user-select: none;
+  }
+
+  .task-card:hover { border-color: var(--black); }
+  .task-card:active { cursor: grabbing; opacity: 0.8; }
+  .task-card.dragging { opacity: 0.4; }
+
+  .task-title { font-size: 12px; font-weight: 400; color: var(--black); line-height: 1.4; margin-bottom: 10px; }
+
+  .task-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .task-tag {
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gray-500);
+    font-weight: 500;
+    border: 1px solid var(--gray-200);
+    padding: 2px 7px;
+    border-radius: 1px;
+  }
+
+  .task-due {
+    font-size: 10px;
+    color: var(--gray-400);
+    font-family: var(--mono);
+  }
+
+  .task-due.urgent { color: var(--black); font-weight: 500; }
+
+  .kanban-empty {
+    border: 1px dashed var(--gray-200);
+    border-radius: 2px;
+    padding: 24px;
+    text-align: center;
+    font-size: 11px;
+    color: var(--gray-300);
+    margin: 4px;
+  }
+
+  /* CRON */
+  .cron-list { }
+
+  .cron-item {
+    display: grid;
+    grid-template-columns: 1fr auto auto auto;
+    gap: 16px;
+    align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--gray-100);
+  }
+
+  .cron-item:last-child { border-bottom: none; }
+
+  .cron-name { font-size: 13px; font-weight: 500; color: var(--black); }
+  .cron-desc { font-size: 11px; color: var(--gray-500); margin-top: 2px; }
+  .cron-schedule { font-size: 11px; font-family: var(--mono); color: var(--gray-600); }
+  .cron-last { font-size: 10px; color: var(--gray-400); text-align: right; }
+
+  .toggle-wrap { display: flex; align-items: center; gap: 8px; }
+
+  .toggle {
+    width: 32px;
+    height: 18px;
+    border-radius: 9px;
+    border: 1px solid var(--gray-300);
+    background: var(--white);
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+
+  .toggle.on { background: var(--black); border-color: var(--black); }
+
+  .toggle-thumb {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--gray-300);
+    transition: all 0.2s;
+  }
+
+  .toggle.on .toggle-thumb { left: 16px; background: var(--white); }
+
+  /* CRON EDITOR MODAL */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: 2px;
+    width: 520px;
+    max-width: 95vw;
+    animation: slideUp 0.2s ease;
+  }
+
+  @keyframes slideUp { from { transform: translateY(8px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+  .modal-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--gray-100);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .modal-title { font-size: 14px; font-weight: 500; }
+  .modal-close { background: none; border: none; cursor: pointer; font-size: 18px; color: var(--gray-400); line-height: 1; padding: 2px 6px; }
+  .modal-close:hover { color: var(--black); }
+
+  .modal-body { padding: 24px; }
+
+  .form-group { margin-bottom: 18px; }
+  .form-label { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gray-500); font-weight: 500; display: block; margin-bottom: 8px; }
+
+  .form-input {
+    width: 100%;
+    border: 1px solid var(--gray-200);
+    border-radius: 2px;
+    padding: 9px 12px;
+    font-family: var(--font);
+    font-size: 13px;
+    color: var(--black);
+    background: var(--white);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .form-input:focus { border-color: var(--black); }
+
+  .form-select {
+    width: 100%;
+    border: 1px solid var(--gray-200);
+    border-radius: 2px;
+    padding: 9px 12px;
+    font-family: var(--font);
+    font-size: 13px;
+    color: var(--black);
+    background: var(--white);
+    outline: none;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23a0a0a0'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+  }
+
+  .form-select:focus { border-color: var(--black); }
+
+  .schedule-builder {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .schedule-preview {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    padding: 10px 14px;
+    border-radius: 2px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--gray-600);
+    margin-top: 10px;
+  }
+
+  .modal-footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--gray-100);
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  /* ANALYTICS */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .three-col { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-bottom: 16px; }
+
+  .bar-chart { display: flex; align-items: flex-end; gap: 8px; height: 120px; padding: 0 4px; }
+
+  .bar-group { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; }
+
+  .bars { display: flex; gap: 3px; align-items: flex-end; height: 100px; }
+
+  .bar {
+    width: 16px;
+    border-radius: 1px 1px 0 0;
+    transition: height 1.2s cubic-bezier(.4,0,.2,1);
+    cursor: pointer;
+  }
+
+  .bar-a { background: var(--black); }
+  .bar-b { background: var(--gray-300); }
+
+  .bar-label { font-size: 9px; color: var(--gray-400); font-family: var(--mono); letter-spacing: 0.05em; }
+
+  .chart-legend { display: flex; gap: 16px; margin-top: 12px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 10px; color: var(--gray-500); }
+  .legend-dot { width: 8px; height: 8px; border-radius: 1px; }
+
+  /* TABLE */
+  .table { width: 100%; border-collapse: collapse; }
+  .table th {
+    text-align: left;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gray-400);
+    font-weight: 500;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--gray-100);
+  }
+
+  .table td {
+    padding: 12px 12px;
+    font-size: 12px;
+    border-bottom: 1px solid var(--gray-50);
+    vertical-align: middle;
+  }
+
+  .table tr:last-child td { border-bottom: none; }
+  .table tr:hover td { background: var(--gray-50); }
+
+  .table-mono { font-family: var(--mono); }
+
+  /* UPLOAD ZONE */
+  .upload-zone {
+    border: 1px dashed var(--gray-300);
+    border-radius: 2px;
+    padding: 40px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-bottom: 20px;
+  }
+
+  .upload-zone:hover, .upload-zone.dragover {
+    border-color: var(--black);
+    background: var(--gray-50);
+  }
+
+  .upload-title { font-size: 13px; font-weight: 500; color: var(--black); margin-bottom: 6px; }
+  .upload-sub { font-size: 11px; color: var(--gray-500); }
+
+  .upload-list { }
+
+  .upload-file-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border: 1px solid var(--gray-200);
+    border-radius: 2px;
+    margin-bottom: 6px;
+    animation: fadeIn 0.2s ease;
+  }
+
+  .upload-file-name { font-size: 12px; color: var(--black); font-family: var(--mono); }
+  .upload-file-size { font-size: 10px; color: var(--gray-400); font-family: var(--mono); margin-top: 2px; }
+  .upload-file-status { font-size: 10px; color: var(--gray-600); }
+  .upload-file-status.done { color: var(--black); font-weight: 500; }
+
+  /* SETTINGS */
+  .settings-section { margin-bottom: 28px; }
+  .settings-section-title {
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gray-400);
+    font-weight: 500;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--gray-100);
+  }
+
+  .settings-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--gray-50);
+  }
+
+  .settings-row:last-child { border-bottom: none; }
+
+  .settings-label { font-size: 13px; color: var(--black); }
+  .settings-desc { font-size: 11px; color: var(--gray-500); margin-top: 2px; }
+
+  .settings-control { min-width: 200px; display: flex; justify-content: flex-end; }
+
+  .settings-input {
+    border: 1px solid var(--gray-200);
+    border-radius: 2px;
+    padding: 7px 10px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--black);
+    background: var(--white);
+    outline: none;
+    width: 200px;
+    text-align: right;
+  }
+
+  .settings-input:focus { border-color: var(--black); }
+
+  .settings-select {
+    border: 1px solid var(--gray-200);
+    border-radius: 2px;
+    padding: 7px 10px;
+    font-family: var(--font);
+    font-size: 12px;
+    color: var(--black);
+    background: var(--white);
+    outline: none;
+    width: 200px;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23a0a0a0'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--gray-200); }
+
+  /* DIVIDER */
+  .divider { height: 1px; background: var(--gray-100); margin: 20px 0; }
+
+  /* NEXT TASK BANNER */
+  .next-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border: 1px solid var(--gray-200);
+    border-radius: 2px;
+    margin-bottom: 20px;
+    background: var(--gray-50);
+  }
+
+  .next-label { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gray-400); margin-bottom: 4px; }
+  .next-task { font-size: 13px; font-weight: 500; color: var(--black); }
+  .next-time { font-size: 11px; color: var(--gray-500); margin-top: 2px; font-family: var(--mono); }
+  .next-countdown { font-size: 22px; font-weight: 300; font-family: var(--mono); color: var(--black); letter-spacing: -0.02em; }
+
+  /* PAGE VISIBILITY */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* INBOX BADGE */
+  .nav-badge {
+    margin-left: auto;
+    background: var(--white);
+    color: var(--black);
+    font-size: 9px;
+    font-weight: 700;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+  }
+</style>
+</head>
+<body>
+
+<!-- API ERROR BANNER -->
+<div id="apiBanner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:999;background:#000;color:#fff;font-size:11px;font-family:'Roboto Mono',monospace;padding:8px 20px;text-align:center;letter-spacing:0.06em;">
+  API bridge not reachable. Run: python api_bridge.py
+</div>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-name" id="agentName">Accounting Agent</div>
+      <div class="logo-sub">AI Employee</div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Monitor</div>
+      <div class="nav-item active" onclick="navigate('live', this)">
+        <div class="nav-icon">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="3" fill="currentColor"/><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1"/></svg>
+        </div>
+        Live Activity
+      </div>
+      <div class="nav-item" onclick="navigate('analytics', this)">
+        <div class="nav-icon">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="8" width="3" height="5" fill="currentColor"/><rect x="5.5" y="5" width="3" height="8" fill="currentColor"/><rect x="10" y="2" width="3" height="11" fill="currentColor"/></svg>
+        </div>
+        Analytics
+      </div>
+
+      <div class="nav-section-label">Manage</div>
+      <div class="nav-item" onclick="navigate('tasks', this)">
+        <div class="nav-icon">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="5" height="12" rx="1" stroke="currentColor" stroke-width="1"/><rect x="8" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1"/><rect x="8" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1"/></svg>
+        </div>
+        Task Board
+      </div>
+      <div class="nav-item" onclick="navigate('upload', this)">
+        <div class="nav-icon">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v8M4 4l3-3 3 3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M1 10v2a1 1 0 001 1h10a1 1 0 001-1v-2" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>
+        </div>
+        Upload
+        <span class="nav-badge" id="uploadBadge">3</span>
+      </div>
+      <div class="nav-item" onclick="navigate('schedule', this)">
+        <div class="nav-icon">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="2" width="12" height="11" rx="1" stroke="currentColor" stroke-width="1"/><path d="M4 1v2M10 1v2M1 6h12" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>
+        </div>
+        Schedule
+      </div>
+
+      <div class="nav-section-label">Configure</div>
+      <div class="nav-item" onclick="navigate('settings', this)">
+        <div class="nav-icon">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="2" stroke="currentColor" stroke-width="1"/><path d="M7 1v1.5M7 11.5V13M1 7h1.5M11.5 7H13M2.5 2.5l1 1M10.5 10.5l1 1M11.5 2.5l-1 1M3.5 10.5l-1 1" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>
+        </div>
+        Settings
+      </div>
+    </nav>
+
+    <div class="sidebar-status">
+      <div class="status-row">
+        <div class="status-dot working" id="statusDot"></div>
+        <span class="status-label" id="statusLabel">Status</span>
+        <span class="status-value" id="statusValue">Working</span>
+      </div>
+      <div style="margin-top:8px; font-size:10px; color:var(--gray-700); font-family:var(--mono);" id="statusTask">Processing invoices...</div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- TOP BAR -->
+    <div class="topbar">
+      <div>
+        <div class="topbar-title" id="pageTitle">Live Activity</div>
+        <div class="topbar-meta" id="pageMeta">Real-time agent log stream</div>
+      </div>
+      <div class="topbar-right">
+        <div style="font-size:11px;color:var(--gray-400);font-family:var(--mono);" id="clockDisplay"></div>
+        <button class="btn btn-secondary" onclick="restartAgent()">Restart Agent</button>
+        <button class="btn btn-primary" onclick="triggerRun()">Run Now</button>
+      </div>
+    </div>
+
+    <!-- LIVE PAGE -->
+    <div class="page active content" id="page-live">
+
+      <!-- Next task banner -->
+      <div class="next-banner">
+        <div>
+          <div class="next-label">Next Scheduled Run</div>
+          <div class="next-task" id="nextTaskName">GSTR-1 April compilation</div>
+          <div class="next-time" id="nextTaskTime">Runs automatically on May 11</div>
+        </div>
+        <div class="next-countdown" id="countdown">27d 14h 22m</div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-cell">
+          <div class="stat-label">Invoices Processed</div>
+          <div class="stat-value" id="stat-invoices">0</div>
+          <div class="stat-sub">this month</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-label">ITC Claimable</div>
+          <div class="stat-value" id="stat-itc">—</div>
+          <div class="stat-sub">rupees — current month</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-label">Tax Liability</div>
+          <div class="stat-value" id="stat-liability">—</div>
+          <div class="stat-sub">rupees — GSTR-3B</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-label">Mismatches</div>
+          <div class="stat-value" id="stat-mismatches">0</div>
+          <div class="stat-sub">flagged for review</div>
+        </div>
+      </div>
+
+      <!-- Log Terminal -->
+      <div class="log-terminal" style="margin-bottom:16px;">
+        <div class="log-bar">
+          <div class="log-bar-left">
+            <div class="log-dots">
+              <div class="log-dot"></div>
+              <div class="log-dot"></div>
+              <div class="log-dot"></div>
+            </div>
+            <div class="log-bar-title">agent — log stream</div>
+          </div>
+          <button class="btn btn-ghost" style="font-size:10px;color:var(--gray-500);padding:4px 10px;" onclick="clearLog()">Clear</button>
+        </div>
+        <div class="log-stream" id="logStream">
+          <div style="color:var(--gray-700);font-size:11px;">Waiting for agent...</div>
+        </div>
+      </div>
+
+      <!-- Recent Activity -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Activity Feed</div>
+          <button class="btn btn-ghost" style="font-size:10px;">View all</button>
+        </div>
+        <div class="card-body" style="padding:0 20px;">
+          <div class="activity-feed" id="activityFeed">
+            <div style="font-size:11px;color:var(--gray-400);padding:16px 0;">Activity will appear here as the agent runs.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ANALYTICS PAGE -->
+    <div class="page content" id="page-analytics">
+
+      <!-- Top KPI cards -->
+      <div class="stats-grid" style="grid-template-columns:repeat(5,1fr);margin-bottom:20px;">
+        <div class="stat-cell">
+          <div class="stat-label">Net Payable</div>
+          <div class="stat-value" id="an-net-payable" style="font-size:18px;">—</div>
+          <div class="stat-sub">after ITC</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-label">Tax Liability</div>
+          <div class="stat-value" id="an-liability" style="font-size:18px;">—</div>
+          <div class="stat-sub">output GST</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-label">ITC Available</div>
+          <div class="stat-value" id="an-itc" style="font-size:18px;">—</div>
+          <div class="stat-sub">claimable</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-label">Invoices</div>
+          <div class="stat-value" id="an-inv-count" style="font-size:18px;">—</div>
+          <div class="stat-sub">processed total</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-label">Invoice Health</div>
+          <div class="stat-value" id="an-health" style="font-size:18px;">—</div>
+          <div class="stat-sub" id="an-health-sub">% clean</div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <!-- Bar chart -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Liability vs ITC by Month</div>
+            <button class="btn btn-ghost" style="font-size:10px;" onclick="loadAnalytics()">Refresh</button>
+          </div>
+          <div class="card-body">
+            <div class="bar-chart" id="barChart" style="height:140px;align-items:flex-end;">
+              <div style="color:var(--gray-400);font-size:11px;">No data yet — run the agent first.</div>
+            </div>
+            <div class="chart-legend" style="margin-top:12px;">
+              <div class="legend-item"><div class="legend-dot" style="background:var(--black)"></div> Tax Liability</div>
+              <div class="legend-item"><div class="legend-dot" style="background:var(--gray-300)"></div> ITC</div>
+              <div class="legend-item"><div class="legend-dot" style="background:var(--gray-500)"></div> Net Payable</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mismatch breakdown -->
+        <div class="card">
+          <div class="card-header"><div class="card-title">Flag Breakdown</div></div>
+          <div class="card-body" style="padding:0 20px;" id="mismatchBreakdown">
+            <div style="font-size:11px;color:var(--gray-400);padding:16px 0;">No mismatch data yet.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <!-- HSN breakdown -->
+        <div class="card">
+          <div class="card-header"><div class="card-title">HSN Summary</div></div>
+          <div class="card-body" style="padding:0;">
+            <table class="table">
+              <thead><tr><th>HSN</th><th>Description</th><th>Taxable Value</th><th>Tax</th></tr></thead>
+              <tbody id="hsnTableBody">
+                <tr><td colspan="4" style="text-align:center;color:var(--gray-400);padding:20px;">No data yet.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Deadlines -->
+        <div class="card">
+          <div class="card-header"><div class="card-title">Upcoming Deadlines</div></div>
+          <div class="card-body" style="padding:0 20px;">
+            <div class="activity-feed" id="deadlinesFeed">
+              <div style="font-size:11px;color:var(--gray-400);padding:16px 0;">Computing...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filing history -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Filing History</div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <span id="an-engine-badge" style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;border:1px solid var(--gray-200);border-radius:3px;color:var(--gray-500);">PyMuPDF</span>
+            <button class="btn btn-ghost" style="font-size:10px;" onclick="loadAnalytics()">Refresh</button>
+          </div>
+        </div>
+        <div class="card-body" style="padding:0;">
+          <table class="table">
+            <thead>
+              <tr><th>Return</th><th>Period</th><th>Generated</th><th>Invoices</th><th>Net Payable</th><th>File</th></tr>
+            </thead>
+            <tbody id="filingHistoryBody">
+              <tr><td colspan="6" style="text-align:center;color:var(--gray-400);padding:20px;">No reports yet.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- UPLOAD     <!-- UPLOAD PAGE -->
+    <div class="page content" id="page-upload">
+      <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+        <div class="upload-title">Drop invoice PDFs here</div>
+        <div class="upload-sub" style="margin-top:4px;">or click to browse — PDF, PNG, JPG supported</div>
+        <input type="file" id="fileInput" style="display:none" multiple accept=".pdf,.png,.jpg,.jpeg" onchange="handleFileSelect(event)"/>
+      </div>
+
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-header">
+          <div class="card-title">Upload Queue</div>
+          <button class="btn btn-primary" onclick="processAll()">Process All</button>
+        </div>
+        <div class="card-body" style="padding:12px 20px;">
+          <div id="uploadList">
+            <div style="font-size:11px;color:var(--gray-400);text-align:center;padding:16px;">No files queued. Drop invoices above.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Output Files</div>
+          <button class="btn btn-ghost" style="font-size:10px;" onclick="loadOutputFiles()">Refresh</button>
+        </div>
+        <div class="card-body" style="padding:0;">
+          <table class="table">
+            <thead>
+              <tr><th>File</th><th>Generated</th><th>Size</th><th>Action</th></tr>
+            </thead>
+            <tbody id="outputsTableBody">
+              <tr><td colspan="4" style="text-align:center;color:var(--gray-400);padding:20px;">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCHEDULE PAGE -->
+    <div class="page content" id="page-schedule">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div style="font-size:12px;color:var(--gray-500);">Define when your agent runs automatically. No cron syntax required.</div>
+        <button class="btn btn-primary" onclick="openCronModal()">+ Add Schedule</button>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">Active Schedules</div></div>
+        <div class="card-body" style="padding:0 20px;" id="cronList">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS PAGE -->
+    <div class="page content" id="page-settings">
+      <div style="max-width:620px;">
+
+        <!-- Business Profile -->
+        <div class="settings-section">
+          <div class="settings-section-title">Business Profile</div>
+          <div class="settings-row">
+            <div><div class="settings-label">Business Name</div></div>
+            <div class="settings-control"><input class="settings-input" id="set-biz" placeholder="Reddy Enterprises Pvt Ltd"/></div>
+          </div>
+          <div class="settings-row">
+            <div><div class="settings-label">GSTIN</div><div class="settings-desc">Your 15-character GST number</div></div>
+            <div class="settings-control"><input class="settings-input" id="set-gstin" placeholder="29ABCDE1234F1Z5"/></div>
+          </div>
+          <div class="settings-row">
+            <div><div class="settings-label">State Code</div><div class="settings-desc">2-digit state code e.g. 29 for Karnataka</div></div>
+            <div class="settings-control"><input class="settings-input" id="set-state" placeholder="29" style="width:80px;"/></div>
+          </div>
+          <div class="settings-row">
+            <div><div class="settings-label">Filing Frequency</div></div>
+            <div class="settings-control">
+              <select class="settings-select" id="set-freq">
+                <option value="Monthly">Monthly</option>
+                <option value="Quarterly">Quarterly</option>
+              </select>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div><div class="settings-label">Primary Business</div><div class="settings-desc">e.g. IT services, trading, manufacturing</div></div>
+            <div class="settings-control"><input class="settings-input" id="set-nature" placeholder="IT services"/></div>
+          </div>
+        </div>
+
+        <!-- Unsiloed AI -->
+        <div class="settings-section" style="border:1px solid var(--gray-200);border-radius:6px;padding:20px;background:var(--gray-50);">
+          <div class="settings-section-title" style="display:flex;align-items:center;gap:8px;">
+            Unsiloed AI — Vision PDF Extraction
+            <span id="unsiloed-badge" style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:2px 8px;border-radius:3px;background:var(--gray-200);color:var(--gray-600);">Not configured</span>
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-label">API Key</div>
+              <div class="settings-desc">Enables extraction from scanned invoices, photos &amp; image PDFs. Without this, only digital PDFs work.</div>
+            </div>
+            <div class="settings-control" style="display:flex;gap:8px;flex-direction:column;align-items:flex-end;">
+              <input class="settings-input" id="set-unsiloed-key" type="password" placeholder="Paste key here..." autocomplete="off"/>
+              <a href="https://www.unsiloed.ai/" target="_blank" style="font-size:11px;color:var(--gray-500);">Get free API key → unsiloed.ai</a>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div><div class="settings-label">Current status</div></div>
+            <div class="settings-control"><span id="unsiloed-status" style="font-size:12px;color:var(--gray-500);">Checking...</span></div>
+          </div>
+        </div>
+
+        <!-- Bujji / LLM config — read only display -->
+        <div class="settings-section">
+          <div class="settings-section-title">Agent Configuration</div>
+          <div class="settings-row">
+            <div><div class="settings-label">LLM Provider</div><div class="settings-desc">Set via <code style="font-size:11px;background:var(--gray-100);padding:1px 4px;border-radius:2px;">cd bujji && python main.py onboard</code></div></div>
+            <div class="settings-control"><span id="cfg-provider" style="font-size:12px;color:var(--gray-500);">Loading...</span></div>
+          </div>
+          <div class="settings-row">
+            <div><div class="settings-label">Model</div></div>
+            <div class="settings-control"><span id="cfg-model" style="font-size:12px;color:var(--gray-500);">Loading...</span></div>
+          </div>
+          <div class="settings-row">
+            <div><div class="settings-label">Workspace</div></div>
+            <div class="settings-control"><span id="cfg-workspace" style="font-size:11px;color:var(--gray-400);word-break:break-all;">Loading...</span></div>
+          </div>
+          <div class="settings-row">
+            <div><div class="settings-label">Bujji Status</div></div>
+            <div class="settings-control"><span id="cfg-bujji-status" style="font-size:12px;color:var(--gray-500);">Checking...</span></div>
+          </div>
+        </div>
+
+        <button class="btn btn-primary" style="width:100%;padding:12px;font-size:13px;" onclick="saveSettings()">Save Settings</button>
+        <div id="settings-msg" style="margin-top:10px;font-size:12px;text-align:center;color:var(--gray-500);min-height:16px;"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- CRON MODAL -->
+<div class="modal-overlay" id="cronModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="cronModalTitle">Add Schedule</div>
+      <button class="modal-close" onclick="closeCronModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Task Name</label>
+        <input class="form-input" id="cron-name" placeholder="e.g. Compile GSTR-1"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">What should the agent do?</label>
+        <input class="form-input" id="cron-prompt" placeholder="e.g. Compile GSTR-1 CSV from all invoices this month and save to outputs/"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Frequency</label>
+        <select class="form-select" id="cron-freq" onchange="updateSchedulePreview()">
+          <option value="daily">Every day</option>
+          <option value="weekly">Every week</option>
+          <option value="monthly">Every month</option>
+          <option value="custom">Custom interval</option>
+        </select>
+      </div>
+      <div class="schedule-builder" id="scheduleBuilder">
+        <div class="form-group">
+          <label class="form-label">Time of Day</label>
+          <select class="form-select" id="cron-time" onchange="updateSchedulePreview()">
+            <option>12:00 AM</option><option>6:00 AM</option>
+            <option>9:00 AM</option><option selected>12:00 PM</option>
+            <option>3:00 PM</option><option>6:00 PM</option>
+            <option>11:00 PM</option>
+          </select>
+        </div>
+        <div class="form-group" id="daySelect">
+          <label class="form-label">Day</label>
+          <select class="form-select" id="cron-day" onchange="updateSchedulePreview()">
+            <option>1st</option><option>5th</option><option>9th</option>
+            <option>10th</option><option>11th</option><option>15th</option>
+            <option>18th</option><option>20th</option><option>Last day</option>
+          </select>
+        </div>
+      </div>
+      <div class="schedule-preview" id="schedulePreview">
+        Runs: Every month on the 1st at 12:00 PM
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeCronModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveCron()">Save Schedule</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// CONFIG — change API_BASE if your bridge runs elsewhere
+// ═══════════════════════════════════════════════════════
+const API_BASE = 'http://localhost:8000/api';
+  // Populated by server at startup
+  window.__INVOICES_DIR__ = '';
+  api('GET', '/config').then(d => { if(d && d.invoices_dir) window.__INVOICES_DIR__ = d.invoices_dir; }).catch(()=>{});
+
+// ─── STATE ──────────────────────────────────────────────
+const state = {
+  currentPage: 'live',
+  uploadQueue: [],   // { file, name, size, status }
+  tasks: {
+    todo: [],
+    inprogress: [],
+    done: [],
+  },
+  cronJobs: [],
+  dragItem: null,
+  dragFrom: null,
+  editingCronId: null,
+  sseSource: null,
+  statsCache: { invoices: 0, mismatches: 0, itc: 0, liability: 0 },
+  currentPage: 'overview',
+};
+
+// ─── API HELPERS ────────────────────────────────────────
+async function api(method, path, body) {
+  try {
+    const opts = { method, headers: { 'Content-Type': 'application/json' } };
+    if (body) opts.body = JSON.stringify(body);
+    const res = await fetch(API_BASE + path, opts);
+    return await res.json();
+  } catch (e) {
+    return { error: e.message };
+  }
+}
+
+function showAPIError(msg) {
+  const banner = document.getElementById('apiBanner');
+  if (!banner) return;
+  banner.textContent = msg;
+  banner.style.display = 'block';
+  setTimeout(() => banner.style.display = 'none', 5000);
+}
+
+// ─── NAVIGATION ─────────────────────────────────────────
+const PAGE_META = {
+  live:      ['Live Activity',  'Real-time agent log stream'],
+  analytics: ['Analytics',     'Filing history and tax metrics'],
+  tasks:     ['Task Board',    'Drag to assign and track work'],
+  upload:    ['Upload',        'Drop invoice PDFs for processing'],
+  schedule:  ['Schedule',      'Manage automated agent schedules'],
+  settings:  ['Settings',      'Configure agent and integrations'],
+};
+
+function navigate(page, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  el.classList.add('active');
+  state.currentPage = page;
+  document.getElementById('pageTitle').textContent = PAGE_META[page][0];
+  document.getElementById('pageMeta').textContent = PAGE_META[page][1];
+  if (page === 'tasks')    renderKanban();
+  if (page === 'schedule') loadCron();
+  state.currentPage = page;
+  if (page === 'analytics') loadAnalytics();
+  if (page === 'upload')   loadOutputFiles();
+  if (page === 'settings') loadSettingsPage();
+}
+
+// ─── CLOCK ──────────────────────────────────────────────
+function updateClock() {
+  const now = new Date();
+  document.getElementById('clockDisplay').textContent =
+    now.toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ─── COUNTDOWN ──────────────────────────────────────────
+function updateCountdown() {
+  const now   = new Date();
+  const next11 = new Date(now.getFullYear(), now.getMonth() + (now.getDate() >= 11 ? 1 : 0), 11);
+  const diff  = next11 - now;
+  const d = Math.floor(diff / 86400000);
+  const h = Math.floor((diff % 86400000) / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  const el = document.getElementById('countdown');
+  if (el) el.textContent = `${d}d ${h}h ${m}m`;
+  const name = document.getElementById('nextTaskName');
+  const time = document.getElementById('nextTaskTime');
+  if (name) name.textContent = `GSTR-1 ${next11.toLocaleString('en-IN',{month:'long'})} filing`;
+  if (time) time.textContent = `Runs automatically on ${next11.toLocaleDateString('en-IN')}`;
+}
+setInterval(updateCountdown, 60000);
+updateCountdown();
+
+// ─── STATUS POLLING ─────────────────────────────────────
+async function pollStatus() {
+  const data = await api('GET', '/status');
+  if (data.error) {
+    setStatus('offline');
+    return;
+  }
+  setStatus(data.running ? 'working' : 'idle', data.task);
+}
+setInterval(pollStatus, 3000);
+pollStatus();
+
+function setStatus(s, task) {
+  const dot   = document.getElementById('statusDot');
+  const value = document.getElementById('statusValue');
+  const taskEl = document.getElementById('statusTask');
+  if (s === 'working') {
+    dot.className   = 'status-dot working';
+    value.textContent = 'Working';
+    if (taskEl && task) taskEl.textContent = task.slice(0, 40) + (task.length > 40 ? '...' : '');
+  } else if (s === 'offline') {
+    dot.className   = 'status-dot idle';
+    value.textContent = 'Offline';
+    if (taskEl) taskEl.textContent = 'API bridge not running';
+  } else {
+    dot.className   = 'status-dot idle';
+    value.textContent = 'Idle';
+    if (taskEl) taskEl.textContent = 'Waiting for next schedule...';
+  }
+}
+
+// ─── SSE LOG STREAM (REAL) ──────────────────────────────
+function startLogStream() {
+  if (state.sseSource) state.sseSource.close();
+  const stream = document.getElementById('logStream');
+  stream.innerHTML = '<div style="color:var(--gray-600);font-size:11px;">Connecting to agent...</div>';
+
+  const es = new EventSource(API_BASE + '/logs/stream');
+  state.sseSource = es;
+
+  es.onopen = () => {
+    stream.innerHTML = '';
+  };
+
+  es.onmessage = (e) => {
+    if (!e.data || e.data.trim() === '') return;
+    appendLogLine(e.data);
+    updateStatsFromLog(e.data);
+  };
+
+  es.onerror = () => {
+    appendLogLine('[ERROR] Cannot connect to API bridge at ' + API_BASE);
+    appendLogLine('[INFO]  Run: python api_bridge.py');
+    es.close();
+    // Retry after 5s
+    setTimeout(startLogStream, 5000);
+  };
+}
+
+function appendLogLine(raw) {
+  const stream = document.getElementById('logStream');
+  const line = document.createElement('div');
+  line.className = 'log-line';
+
+  // Classify log type from content
+  let cls = 'log-info';
+  if (raw.includes('[ERROR]') || raw.includes('error') || raw.includes('Error')) cls = 'log-warn';
+  else if (raw.includes('MISMATCH') || raw.includes('WARN') || raw.includes('flagged')) cls = 'log-warn';
+  else if (raw.includes('[AGENT]') || raw.includes('Extracting') || raw.includes('Processing')) cls = 'log-work';
+  else if (raw.includes('complete') || raw.includes('validated') || raw.includes('compiled') || raw.includes('Done')) cls = 'log-success';
+
+  const now = new Date().toTimeString().slice(0,8);
+  line.innerHTML = `<span class="log-time">[${now}]</span> <span class="${cls}">${escHtml(raw)}</span>`;
+  stream.appendChild(line);
+  stream.scrollTop = stream.scrollHeight;
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function updateStatsFromLog(line) {
+  // Match: "GSTR-3B generated for ... | Liability:3456 ITC:1234 Net:2222"
+  if (line.includes('GSTR-3B generated') || line.includes('Liability:')) {
+    const mL = line.match(/Liability:([\d.]+)/);
+    const mI = line.match(/ITC:([\d.]+)/);
+    const mN = line.match(/Net:([\d.]+)/);
+    if (mL) {
+      const el = document.getElementById('stat-liability');
+      if (el) el.textContent = '₹' + parseFloat(mL[1]).toLocaleString('en-IN');
+    }
+    if (mI) {
+      const el = document.getElementById('stat-itc');
+      if (el) el.textContent = '₹' + parseFloat(mI[1]).toLocaleString('en-IN');
+    }
+  }
+  // Match: "EXTRACTED: invoice.pdf | INV: VS-001 | ... | Flags: 2"
+  if (line.includes('EXTRACTED:')) {
+    const el = document.getElementById('stat-invoices');
+    if (el) el.textContent = parseInt(el.textContent || 0) + 1;
+  }
+  // Match: "files_processed: N" or "Mismatch report: N flagged"
+  if (line.includes('files_processed')) {
+    const m = line.match(/files_processed[":]+\s*(\d+)/);
+    if (m) { const el = document.getElementById('stat-invoices'); if(el) el.textContent = m[1]; }
+  }
+  // Match: "Mismatch report: 3 flagged / 10 total"
+  if (line.includes('flagged /') || line.includes('Mismatch report:')) {
+    const m = line.match(/(\d+)\s*flagged/);
+    if (m) { const el = document.getElementById('stat-mismatches'); if(el) el.textContent = m[1]; }
+  }
+  // Auto-refresh when agent finishes
+  if (line.includes('Going idle') || line.includes('[AGENT] Done')) {
+    setTimeout(() => {
+      loadOutputFiles();
+      if (state.currentPage === 'analytics') loadAnalytics();
+    }, 1500);
+  }
+}
+
+function clearLog() {
+  document.getElementById('logStream').innerHTML = '<div style="color:var(--gray-600);font-size:11px;">Log cleared.</div>';
+}
+
+// ─── RUN AGENT ──────────────────────────────────────────
+async function triggerRun() {
+  const prompt = 'Call scan_invoice_directory with directory="' + window.__INVOICES_DIR__ + '". Then call compile_gstr1, generate_gstr3b, and generate_mismatch_report. End with the SUMMARY block.';
+  const res = await api('POST', '/run', { prompt });
+  if (res.error) {
+    showAPIError('Could not reach API bridge: ' + res.error);
+  } else {
+    appendLogLine('[INFO] Agent triggered — ' + prompt.slice(0,60));
+  }
+}
+
+async function restartAgent() {
+  clearLog();
+  await triggerRun();
+}
+
+// ─── KANBAN (persisted in localStorage as fallback) ──────
+const KANBAN_KEY = 'gst_kanban_tasks';
+
+function loadKanbanFromStorage() {
+  try {
+    const saved = localStorage.getItem(KANBAN_KEY);
+    if (saved) state.tasks = JSON.parse(saved);
+  } catch(e) {}
+}
+
+function saveKanbanToStorage() {
+  try { localStorage.setItem(KANBAN_KEY, JSON.stringify(state.tasks)); } catch(e) {}
+}
+
+function renderKanban() {
+  const cols = [
+    { key:'todo',       label:'To Do' },
+    { key:'inprogress', label:'In Progress' },
+    { key:'done',       label:'Done' },
+  ];
+  const grid = document.getElementById('kanbanGrid');
+  grid.innerHTML = '';
+  cols.forEach(col => {
+    const tasks = state.tasks[col.key] || [];
+    const colEl = document.createElement('div');
+    colEl.className = 'kanban-col';
+    colEl.innerHTML = `
+      <div class="kanban-col-header">
+        <div class="kanban-col-title">${col.label}</div>
+        <div class="kanban-count">${tasks.length}</div>
+      </div>
+      <div class="kanban-body" id="col-${col.key}"
+        ondragover="kanbanDragOver(event,'${col.key}')"
+        ondragleave="kanbanDragLeave(event,'${col.key}')"
+        ondrop="kanbanDrop(event,'${col.key}')">
+        ${tasks.length === 0 ? '<div class="kanban-empty">Drop tasks here</div>' : ''}
+        ${tasks.map(t => `
+          <div class="task-card" draggable="true"
+            ondragstart="kanbanDragStart(event,${t.id},'${col.key}')">
+            <div class="task-title">${escHtml(t.title)}</div>
+            <div class="task-footer">
+              <span class="task-tag">${escHtml(t.tag)}</span>
+              <span class="task-due${t.due==='Today'?' urgent':''}">${escHtml(t.due)}</span>
+            </div>
+          </div>
+        `).join('')}
+      </div>`;
+    grid.appendChild(colEl);
+  });
+}
+
+function kanbanDragStart(e, id, fromCol) { state.dragItem = id; state.dragFrom = fromCol; }
+function kanbanDragOver(e, col) { e.preventDefault(); document.getElementById('col-'+col).classList.add('dragover'); }
+function kanbanDragLeave(e, col) { document.getElementById('col-'+col).classList.remove('dragover'); }
+function kanbanDrop(e, toCol) {
+  e.preventDefault();
+  document.getElementById('col-'+toCol).classList.remove('dragover');
+  if (!state.dragItem || state.dragFrom === toCol) return;
+  const task = (state.tasks[state.dragFrom]||[]).find(t => t.id === state.dragItem);
+  if (!task) return;
+  state.tasks[state.dragFrom] = state.tasks[state.dragFrom].filter(t => t.id !== state.dragItem);
+  state.tasks[toCol] = [...(state.tasks[toCol]||[]), task];
+  state.dragItem = null; state.dragFrom = null;
+  saveKanbanToStorage();
+  renderKanban();
+}
+
+function openNewTask() {
+  const title = prompt('Task name:');
+  if (!title) return;
+  const tag = prompt('Tag (Filing / Reconciliation / Invoices / Compliance):') || 'Filing';
+  const due  = prompt('Due date (e.g. May 15):') || 'TBD';
+  state.tasks.todo.push({ id: Date.now(), title, tag, due });
+  saveKanbanToStorage();
+  renderKanban();
+}
+
+// ─── UPLOAD — REAL API ───────────────────────────────────
+function handleDragOver(e) { e.preventDefault(); document.getElementById('uploadZone').classList.add('dragover'); }
+function handleDragLeave(e) { document.getElementById('uploadZone').classList.remove('dragover'); }
+function handleDrop(e) { e.preventDefault(); document.getElementById('uploadZone').classList.remove('dragover'); addFiles(Array.from(e.dataTransfer.files)); }
+function handleFileSelect(e) { addFiles(Array.from(e.target.files)); }
+
+function addFiles(files) {
+  files.forEach(f => {
+    state.uploadQueue.push({ file: f, name: f.name, size: (f.size/1024).toFixed(0)+' KB', status: 'Queued' });
+  });
+  renderUploadQueue();
+  updateUploadBadge();
+}
+
+function renderUploadQueue() {
+  const list = document.getElementById('uploadList');
+  if (state.uploadQueue.length === 0) {
+    list.innerHTML = '<div style="font-size:11px;color:var(--gray-400);text-align:center;padding:16px;">No files queued. Drop invoices above.</div>';
+    return;
+  }
+  list.innerHTML = state.uploadQueue.map((f,i) => `
+    <div class="upload-file-item">
+      <div>
+        <div class="upload-file-name">${escHtml(f.name)}</div>
+        <div class="upload-file-size">${f.size}</div>
+      </div>
+      <div class="upload-file-status${f.status==='Uploaded'?' done':f.status==='Error'?' warn':''}">
+        ${f.status}
+      </div>
+    </div>`).join('');
+}
+
+function updateUploadBadge() {
+  const q = state.uploadQueue.filter(f => f.status === 'Queued').length;
+  document.getElementById('uploadBadge').textContent = q || '';
+}
+
+async function processAll() {
+  for (let i = 0; i < state.uploadQueue.length; i++) {
+    const item = state.uploadQueue[i];
+    if (item.status !== 'Queued') continue;
+    item.status = 'Uploading...';
+    renderUploadQueue();
+    try {
+      const arrayBuffer = await item.file.arrayBuffer();
+      const res = await fetch(API_BASE + '/upload', {
+        method: 'POST',
+        headers: { 'X-Filename': item.name, 'Content-Type': 'application/octet-stream' },
+        body: arrayBuffer,
+      });
+      const data = await res.json();
+      item.status = data.error ? 'Error' : 'Uploaded';
+    } catch(e) {
+      item.status = 'Error';
+    }
+    renderUploadQueue();
+    updateUploadBadge();
+  }
+  // After all uploads, fire agent — don't await (it takes minutes)
+  const hasUploads = state.uploadQueue.some(f => f.status === 'Uploaded');
+  if (hasUploads) {
+    appendLogLine('[INFO] Upload complete — agent is now processing your invoices...');
+    appendLogLine('[INFO] Watch the Live Log tab for real-time progress.');
+    // Fire and forget — server.py auto-triggers agent on upload anyway
+    api('POST', '/run', { prompt: 'Call scan_invoice_directory with directory="' + window.__INVOICES_DIR__ + '". Then call compile_gstr1, generate_gstr3b, and generate_mismatch_report. End with the SUMMARY block.' }).catch(()=>{});
+    state.uploadQueue = [];
+    renderUploadQueue();
+    updateUploadBadge();
+    navigate('overview', document.querySelector('.nav-item'));
+  }
+}
+
+// ─── OUTPUT FILES — REAL API ─────────────────────────────
+async function loadOutputFiles() {
+  const data = await api('GET', '/outputs');
+  const tbody = document.getElementById('outputsTableBody');
+  if (!tbody) return;
+  if (data.error || !data.files || data.files.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--gray-400);padding:20px;">
+      ${data.error ? 'API bridge not running — start api_bridge.py' : 'No output files yet. Upload invoices and run the agent.'}
+    </td></tr>`;
+    return;
+  }
+  tbody.innerHTML = data.files.map(f => `
+    <tr>
+      <td class="table-mono">${escHtml(f.name)}</td>
+      <td>${new Date(f.modified).toLocaleString('en-IN')}</td>
+      <td class="table-mono">${(f.size/1024).toFixed(1)} KB</td>
+      <td>
+        <a href="${API_BASE}/outputs/${encodeURIComponent(f.name)}" download
+           style="font-size:11px;color:var(--black);text-decoration:underline;">
+          Download
+        </a>
+      </td>
+    </tr>`).join('');
+}
+
+// ─── CRON — REAL API ─────────────────────────────────────
+async function loadCron() {
+  const data = await api('GET', '/cron');
+  if (data.error) {
+    document.getElementById('cronList').innerHTML =
+      '<div style="padding:16px;color:var(--gray-400);font-size:11px;">API bridge not running. Start api_bridge.py to manage schedules.</div>';
+    return;
+  }
+  state.cronJobs = data.jobs || [];
+  renderCron();
+}
+
+function renderCron() {
+  const list = document.getElementById('cronList');
+  if (state.cronJobs.length === 0) {
+    list.innerHTML = '<div style="padding:16px;color:var(--gray-400);font-size:11px;">No schedules yet. Click + Add Schedule.</div>';
+    return;
+  }
+  list.innerHTML = state.cronJobs.map(job => `
+    <div class="cron-item">
+      <div>
+        <div class="cron-name">${escHtml(job.name)}</div>
+        <div class="cron-desc">${escHtml(job.prompt.slice(0,80))}${job.prompt.length>80?'...':''}</div>
+      </div>
+      <div class="cron-schedule">${escHtml(job.schedule_label || '')}</div>
+      <div class="cron-last">Last run: ${job.last_run ? new Date(job.last_run).toLocaleString('en-IN') : 'Never'}</div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="btn btn-ghost" style="font-size:10px;padding:4px 10px;"
+          onclick="editCron(${job.id})">Edit</button>
+        <div class="toggle ${job.enabled ? 'on' : ''}" onclick="toggleCron(${job.id})">
+          <div class="toggle-thumb"></div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+async function toggleCron(id) {
+  await api('PATCH', `/cron/${id}/toggle`, {});
+  await loadCron();
+}
+
+function openCronModal(editId) {
+  state.editingCronId = editId || null;
+  if (editId) {
+    const job = state.cronJobs.find(j => j.id === editId);
+    if (job) {
+      document.getElementById('cron-name').value   = job.name;
+      document.getElementById('cron-prompt').value = job.prompt;
+    }
+    document.getElementById('cronModalTitle').textContent = 'Edit Schedule';
+  } else {
+    document.getElementById('cron-name').value   = '';
+    document.getElementById('cron-prompt').value = '';
+    document.getElementById('cronModalTitle').textContent = 'Add Schedule';
+  }
+  updateSchedulePreview();
+  document.getElementById('cronModal').classList.add('open');
+}
+
+function editCron(id) { openCronModal(id); }
+function closeCronModal() { document.getElementById('cronModal').classList.remove('open'); state.editingCronId = null; }
+
+function updateSchedulePreview() {
+  const freq = document.getElementById('cron-freq').value;
+  const time = document.getElementById('cron-time').value;
+  const day  = document.getElementById('cron-day') ? document.getElementById('cron-day').value : '';
+  let preview = '';
+  if (freq === 'daily')        preview = `Runs: Every day at ${time}`;
+  else if (freq === 'weekly')  preview = `Runs: Every week on Monday at ${time}`;
+  else if (freq === 'monthly') preview = `Runs: Every month on the ${day} at ${time}`;
+  else                         preview = 'Runs: Custom interval';
+  document.getElementById('schedulePreview').textContent = preview;
+}
+
+const FREQ_MINUTES = { daily: 1440, weekly: 10080, monthly: 43200, custom: 1440 };
+
+async function saveCron() {
+  const name   = document.getElementById('cron-name').value.trim();
+  const prompt = document.getElementById('cron-prompt').value.trim();
+  if (!name || !prompt) { alert('Please fill in task name and description.'); return; }
+  const freq  = document.getElementById('cron-freq').value;
+  const time  = document.getElementById('cron-time').value;
+  const day   = document.getElementById('cron-day') ? document.getElementById('cron-day').value : '';
+  let schedule_label = '';
+  if (freq === 'daily')        schedule_label = `Every day at ${time}`;
+  else if (freq === 'weekly')  schedule_label = `Every week on Monday at ${time}`;
+  else                         schedule_label = `Every month on the ${day} at ${time}`;
+
+  const payload = { name, prompt, schedule_label, interval_minutes: FREQ_MINUTES[freq] || 1440 };
+
+  if (state.editingCronId) {
+    await api('PUT', `/cron/${state.editingCronId}`, payload);
+  } else {
+    await api('POST', '/cron', payload);
+  }
+  closeCronModal();
+  await loadCron();
+}
+
+document.getElementById('cronModal').addEventListener('click', function(e) {
+  if (e.target === this) closeCronModal();
+});
+
+// ─── ANALYTICS — 100% REAL DATA ─────────────────────────
+async function loadAnalytics() {
+  renderDeadlines();
+
+  const data = await api('GET', '/outputs');
+  if (data.error || !data.files) {
+    document.getElementById('barChart').innerHTML =
+      '<div style="color:var(--gray-400);font-size:11px;padding:20px 0;">Cannot reach server.</div>';
+    return;
+  }
+
+  const files = data.files;
+  const g3b   = files.filter(f => f.name.startsWith('gstr3b-') && f.name.endsWith('.json'));
+  const g1b2b = files.filter(f => f.name.startsWith('gstr1-b2b-'));
+  const mmf   = files.filter(f => f.name.startsWith('mismatch-report-'));
+  const plf   = files.filter(f => f.name.startsWith('pl-report-') && f.name.endsWith('.json'));
+  const batch = files.find(f => f.name === 'batch_extracted.json');
+
+  // ── Load gstr3b data ──────────────────────────────────
+  const g3bData = [];
+  for (const f of g3b) {
+    try {
+      const r = await fetch(`${API_BASE}/outputs/${encodeURIComponent(f.name)}`);
+      const j = await r.json(); j._fn = f.name; j._mod = f.modified;
+      g3bData.push(j);
+    } catch(e) {}
+  }
+  g3bData.sort((a,b) => a._fn > b._fn ? 1 : -1);
+
+  // ── KPI cards ─────────────────────────────────────────
+  const totLiab  = g3bData.reduce((s,d) => s + (d['3_1_outward_supplies']?.total_liability || 0), 0);
+  const totITC   = g3bData.reduce((s,d) => s + (d['4_itc_available']?.total_itc || 0), 0);
+  const totNet   = g3bData.reduce((s,d) => s + (d['6_tax_payable']?.net_payable || 0), 0);
+  const totInv   = g3bData.reduce((s,d) => s + (d['summary']?.invoices_processed || 0), 0);
+
+  const fmt = n => n ? '₹' + Math.round(n).toLocaleString('en-IN') : '—';
+  document.getElementById('an-net-payable').textContent = fmt(totNet);
+  document.getElementById('an-liability').textContent   = fmt(totLiab);
+  document.getElementById('an-itc').textContent         = fmt(totITC);
+  document.getElementById('an-inv-count').textContent   = totInv || (batch ? '?' : '—');
+
+  // ── Invoice health from batch_extracted ──────────────
+  if (batch) {
+    try {
+      const r = await fetch(`${API_BASE}/outputs/batch_extracted.json`);
+      const j = await r.json();
+      const invs   = j.invoices || [];
+      const clean  = invs.filter(i => !i.flags || i.flags.length === 0).length;
+      const health = invs.length ? Math.round((clean / invs.length) * 100) : 0;
+      document.getElementById('an-health').textContent     = invs.length ? health + '%' : '—';
+      document.getElementById('an-health-sub').textContent = invs.length
+        ? `${clean}/${invs.length} clean`
+        : '% clean';
+      // Engine badge
+      const engine = j.extraction_engine || 'pymupdf_text';
+      const badge  = document.getElementById('an-engine-badge');
+      if (badge) {
+        badge.textContent = engine === 'unsiloed_vision' ? 'Unsiloed AI' : 'PyMuPDF';
+        badge.style.color = engine === 'unsiloed_vision' ? 'var(--black)' : 'var(--gray-500)';
+        badge.style.borderColor = engine === 'unsiloed_vision' ? 'var(--black)' : 'var(--gray-300)';
+      }
+      // HSN table
+      const hsnMap = {};
+      invs.forEach(inv => {
+        (inv.hsn_codes || []).forEach(h => {
+          if (!h || !h.code) return;
+          if (!hsnMap[h.code]) hsnMap[h.code] = {desc: h.description || '', taxable: 0, tax: 0};
+          hsnMap[h.code].taxable += h.taxable_value || 0;
+          hsnMap[h.code].tax     += ((h.taxable_value || 0) * (h.gst_rate || 0) / 100);
+        });
+      });
+      const hsnRows = Object.entries(hsnMap).slice(0, 10);
+      document.getElementById('hsnTableBody').innerHTML = hsnRows.length
+        ? hsnRows.map(([code, v]) => `
+            <tr>
+              <td class="table-mono">${escHtml(code)}</td>
+              <td style="font-size:11px;">${escHtml(v.desc.slice(0,40))}</td>
+              <td class="table-mono">₹${Math.round(v.taxable).toLocaleString('en-IN')}</td>
+              <td class="table-mono">₹${Math.round(v.tax).toLocaleString('en-IN')}</td>
+            </tr>`).join('')
+        : '<tr><td colspan="4" style="text-align:center;color:var(--gray-400);padding:16px;">No HSN data yet.</td></tr>';
+    } catch(e) {}
+  }
+
+  // ── Bar chart ─────────────────────────────────────────
+  const chart = document.getElementById('barChart');
+  if (g3bData.length === 0) {
+    chart.innerHTML = '<div style="color:var(--gray-400);font-size:11px;padding:20px 0;">No GSTR-3B data yet. Upload invoices and run the agent.</div>';
+  } else {
+    const months = g3bData.slice(-6).map(d => ({
+      month:     (d.period || d._fn.replace('gstr3b-','').replace('.json','')).slice(0,7),
+      liability: d['3_1_outward_supplies']?.total_liability || 0,
+      itc:       d['4_itc_available']?.total_itc || 0,
+      net:       d['6_tax_payable']?.net_payable || 0,
+    }));
+    const maxVal = Math.max(...months.flatMap(m => [m.liability, m.itc, m.net]), 1);
+    chart.innerHTML = months.map(m => `
+      <div class="bar-group" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">
+        <div style="display:flex;align-items:flex-end;gap:2px;height:120px;">
+          <div style="width:14px;background:var(--black);height:${Math.round((m.liability/maxVal)*110)}px;border-radius:2px 2px 0 0;"
+               title="Liability: ₹${Math.round(m.liability).toLocaleString('en-IN')}"></div>
+          <div style="width:14px;background:var(--gray-300);height:${Math.round((m.itc/maxVal)*110)}px;border-radius:2px 2px 0 0;"
+               title="ITC: ₹${Math.round(m.itc).toLocaleString('en-IN')}"></div>
+          <div style="width:14px;background:var(--gray-500);height:${Math.round((m.net/maxVal)*110)}px;border-radius:2px 2px 0 0;"
+               title="Net: ₹${Math.round(m.net).toLocaleString('en-IN')}"></div>
+        </div>
+        <div style="font-size:9px;color:var(--gray-500);text-align:center;">${m.month}</div>
+      </div>`).join('');
+  }
+
+  // ── Mismatch breakdown from CSV ───────────────────────
+  const bd = document.getElementById('mismatchBreakdown');
+  if (mmf.length === 0) {
+    bd.innerHTML = '<div style="font-size:11px;color:var(--gray-400);padding:16px 0;">No mismatch reports yet.</div>';
+  } else {
+    try {
+      const latest = mmf[mmf.length - 1];
+      const r    = await fetch(`${API_BASE}/outputs/${encodeURIComponent(latest.name)}`);
+      const text = await r.text();
+      const rows = text.trim().split('\n').slice(1).filter(r => r.trim());
+      const cats = {};
+      rows.forEach(row => {
+        const col = row.split(',')[0].replace(/"/g,'').trim() || 'other';
+        cats[col] = (cats[col] || 0) + 1;
+      });
+      const total = rows.length;
+      const labels = {
+        tax_rate_mismatch:'Tax Rate Mismatch', missing_gstin:'Missing GSTIN',
+        itc_blocked:'ITC Blocked', duplicate_suspected:'Duplicate', other:'Other'
+      };
+      const items = Object.entries(cats).map(([k,v]) => ({label: labels[k]||k, count:v}));
+      if (!items.length) {
+        bd.innerHTML = '<div style="font-size:11px;color:var(--gray-400);padding:16px 0;">All clean — no flags.</div>';
+      } else {
+        bd.innerHTML = items.map(item => `
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--gray-50);">
+            <span style="font-size:12px;">${escHtml(item.label)}</span>
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div style="width:100px;height:4px;background:var(--gray-100);border-radius:2px;">
+                <div style="width:${total>0?Math.round((item.count/total)*100):0}%;height:100%;background:var(--black);border-radius:2px;"></div>
+              </div>
+              <span style="font-size:11px;font-weight:500;min-width:16px;text-align:right;">${item.count}</span>
+            </div>
+          </div>`).join('');
+      }
+    } catch(e) {
+      bd.innerHTML = '<div style="font-size:11px;color:var(--gray-400);padding:16px 0;">Could not load report.</div>';
+    }
+  }
+
+  // ── Filing history ────────────────────────────────────
+  const rows = [];
+  for (const d of g3bData) {
+    rows.push({
+      type: 'GSTR-3B', period: d.period || '—', mod: d._mod,
+      invoices: d['summary']?.invoices_processed || '—',
+      amount: fmt(d['6_tax_payable']?.net_payable), file: d._fn,
+    });
+  }
+  for (const f of g1b2b) {
+    rows.push({type:'GSTR-1', period:f.name.replace('gstr1-b2b-','').replace('.csv',''),
+               mod:f.modified, invoices:'—', amount:'—', file:f.name});
+  }
+  for (const f of mmf) {
+    rows.push({type:'Mismatch', period:f.name.replace('mismatch-report-','').replace('.csv',''),
+               mod:f.modified, invoices:'—', amount:'—', file:f.name});
+  }
+  rows.sort((a,b) => new Date(b.mod) - new Date(a.mod));
+
+  const tbody = document.getElementById('filingHistoryBody');
+  tbody.innerHTML = rows.length
+    ? rows.map(r => `
+        <tr>
+          <td class="table-mono">${escHtml(r.type)}</td>
+          <td>${escHtml(r.period)}</td>
+          <td class="table-mono">${new Date(r.mod).toLocaleDateString('en-IN')}</td>
+          <td class="table-mono">${r.invoices}</td>
+          <td class="table-mono">${r.amount}</td>
+          <td><a href="${API_BASE}/outputs/${encodeURIComponent(r.file)}" download
+              style="font-size:11px;color:var(--black);text-decoration:underline;">Download</a></td>
+        </tr>`).join('')
+    : '<tr><td colspan="6" style="text-align:center;color:var(--gray-400);padding:20px;">No reports yet.</td></tr>';
+}
+
+// ── Deadlines — computed from today's actual date ─────────
+function renderDeadlines() {
+  const now   = new Date();
+  const year  = now.getFullYear();
+  const month = now.getMonth(); // 0-indexed
+
+  // Generate next 4 GST deadlines from today
+  const deadlines = [];
+  for (let i = 0; i <= 3; i++) {
+    const m = (month + i) % 12;
+    const y = year + Math.floor((month + i) / 12);
+    const monthName = new Date(y, m, 1).toLocaleString('en-IN', { month: 'long' });
+    const prevMonth = new Date(y, m - 1, 1).toLocaleString('en-IN', { month: 'long' });
+
+    deadlines.push({
+      date:  new Date(y, m, 11),
+      label: `GSTR-1 ${prevMonth} ${m === 0 ? y - 1 : y}`,
+      meta:  'Outward supply return',
+    });
+    deadlines.push({
+      date:  new Date(y, m, 20),
+      label: `GSTR-3B ${prevMonth} ${m === 0 ? y - 1 : y}`,
+      meta:  'Summary return + tax payment',
+    });
+  }
+
+  // Filter to only future deadlines, take next 4
+  const upcoming = deadlines
+    .filter(d => d.date > now)
+    .sort((a, b) => a.date - b.date)
+    .slice(0, 4);
+
+  const feed = document.getElementById('deadlinesFeed');
+  feed.innerHTML = upcoming.map(d => {
+    const days   = Math.ceil((d.date - now) / 86400000);
+    const urgent = days <= 7;
+    const dateStr = d.date.toLocaleDateString('en-IN', { day:'numeric', month:'short' });
+    return `
+      <div class="activity-item">
+        <div class="activity-time">${dateStr}</div>
+        <div class="activity-content">
+          <div class="activity-title">${escHtml(d.label)}</div>
+          <div class="activity-meta">${d.meta}</div>
+        </div>
+        <span class="badge ${urgent ? 'badge-warn' : 'badge-info'}">${days}d</span>
+      </div>`;
+  }).join('');
+}
+
+// ─── SETTINGS ───────────────────────────────────────────
+function toggleSetting(el) { el.classList.toggle('on'); }
+
+// ─── SETTINGS ───────────────────────────────────────────
+
+async function loadSettingsPage() {
+  const r = await api('GET', '/settings');
+  if (r.error) return;
+
+  // Populate business fields
+  if (r.business_name) _setVal('set-biz',   r.business_name);
+  if (r.gstin)         _setVal('set-gstin',  r.gstin);
+  if (r.state_code)    _setVal('set-state',  r.state_code);
+  if (r.nature)        _setVal('set-nature', r.nature);
+  if (r.filing_freq) {
+    const sel = document.getElementById('set-freq');
+    if (sel) sel.value = r.filing_freq;
+  }
+
+  // Unsiloed status
+  const uStatus = document.getElementById('unsiloed-status');
+  const uBadge  = document.getElementById('unsiloed-badge');
+  if (r.unsiloed_api_key_set) {
+    if (uStatus) { uStatus.textContent = `Active — ${r.unsiloed_api_key_preview} — vision extraction ON`; uStatus.style.color = 'var(--black)'; }
+    if (uBadge)  { uBadge.textContent = 'Active'; uBadge.style.background = 'var(--black)'; uBadge.style.color = 'var(--white)'; }
+  } else {
+    if (uStatus) { uStatus.textContent = 'Not set — PyMuPDF only (digital PDFs)'; uStatus.style.color = 'var(--gray-500)'; }
+    if (uBadge)  { uBadge.textContent = 'Not configured'; uBadge.style.background = 'var(--gray-200)'; uBadge.style.color = 'var(--gray-600)'; }
+  }
+
+  // Bujji / LLM config
+  _setText('cfg-provider',  r.provider  || '—');
+  _setText('cfg-model',     r.model     || '—');
+  _setText('cfg-workspace', r.workspace || '—');
+
+  // Check if bujji is alive
+  const ping = await api('GET', '/bujji/ping');
+  const bStatus = document.getElementById('cfg-bujji-status');
+  if (bStatus) {
+    if (ping.online) {
+      bStatus.textContent = 'Online ✓';
+      bStatus.style.color = 'var(--black)';
+    } else {
+      bStatus.textContent = 'Offline — run: cd bujji && python main.py serve';
+      bStatus.style.color = 'var(--gray-400)';
+    }
+  }
+}
+
+function _setVal(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.value = val;
+}
+function _setText(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val;
+}
+
+async function saveSettings() {
+  const btn = event.target;
+  const msg = document.getElementById('settings-msg');
+
+  const payload = {
+    unsiloed_api_key: (document.getElementById('set-unsiloed-key')?.value || '').trim(),
+    business_name:    (document.getElementById('set-biz')?.value || '').trim(),
+    gstin:            (document.getElementById('set-gstin')?.value || '').trim(),
+    state_code:       (document.getElementById('set-state')?.value || '').trim(),
+    filing_freq:      (document.getElementById('set-freq')?.value || '').trim(),
+    nature:           (document.getElementById('set-nature')?.value || '').trim(),
+  };
+
+  const r = await api('POST', '/settings', payload);
+  if (r.error) {
+    if (msg) { msg.textContent = 'Error: ' + r.error; msg.style.color = 'red'; }
+    return;
+  }
+
+  // Clear password field after saving
+  const keyEl = document.getElementById('set-unsiloed-key');
+  if (keyEl) keyEl.value = '';
+
+  // Update sidebar name if business name was set
+  if (payload.business_name) {
+    const nameEl = document.getElementById('agentName');
+    if (nameEl) nameEl.textContent = payload.business_name;
+  }
+
+  btn.textContent = 'Saved ✓';
+  btn.style.background = 'var(--gray-800)';
+  if (msg) { msg.textContent = 'Configuration saved. USER.md updated.'; msg.style.color = 'var(--gray-500)'; }
+  setTimeout(() => {
+    btn.textContent = 'Save Settings';
+    btn.style.background = '';
+    if (msg) msg.textContent = '';
+  }, 3000);
+
+  // Reload status to reflect new key
+  await loadSettingsPage();
+}
+
+// ─── INIT ───────────────────────────────────────────────
+loadKanbanFromStorage();
+startLogStream();
+loadSettingsPage();
+</script>
+</body>
+</html>
